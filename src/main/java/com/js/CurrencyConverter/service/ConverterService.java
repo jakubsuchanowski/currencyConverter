@@ -43,7 +43,6 @@ public class ConverterService {
 
     public Double getConvertedValue(String baseCurrency, String targetCurrency, Double amount){
             Double response = null;
-
             if (!baseCurrency.equals("PLN") && !targetCurrency.equals("PLN")) {
                 ExchangeRateDto getBaseRate = restTemplate.getForObject(apiUrl2 + "/" + baseCurrency, ExchangeRateDto.class);
                 Double rateBaseCurrency = getBaseRate.getRates().get(0).getMid();
@@ -62,8 +61,18 @@ public class ConverterService {
                 Double rateBaseCurrency = getBaseRate.getRates().get(0).getMid();
                 response = amount * rateBaseCurrency;
             }
+            if(baseCurrency.equals(targetCurrency)) {
+                response = amount;
+            }
             convertHistoryRepository.save(new ConvertHistory(0L, baseCurrency,targetCurrency, amount,response, LocalDateTime.now()));
             return response;
 
+    }
+    public List<ConvertHistory> getConvertHistory(){
+        return convertHistoryRepository.findAll();
+    }
+
+    public void clearHistory(){
+        convertHistoryRepository.deleteAll();
     }
 }

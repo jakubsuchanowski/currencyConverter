@@ -1,10 +1,8 @@
 package com.js.CurrencyConverter.controller;
 
-import com.js.CurrencyConverter.exceptions.ExceptionMessage;
-import com.js.CurrencyConverter.model.ExchangeRateDto;
+import com.js.CurrencyConverter.entity.ConvertHistory;
 import com.js.CurrencyConverter.service.ConverterService;
 import lombok.AllArgsConstructor;
-import lombok.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,6 +18,8 @@ public class ConverterController {
         return ResponseEntity.ok().body(converterService.getExchangeRates());
     }
 
+
+    @CrossOrigin("http://127.0.0.1:5500")
     @GetMapping("/currencyconvert/{baseCurrency}/{targetCurrency}")
     public ResponseEntity convertCurrency(
             @PathVariable(value = "baseCurrency") String baseCurrency,
@@ -30,5 +30,18 @@ public class ConverterController {
         }catch (Exception e){
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+
+    @CrossOrigin("http://127.0.0.1:5500")
+    @GetMapping("/currencyconvert/history")
+    public ResponseEntity<List<ConvertHistory>> showAllConversions(){
+        return ResponseEntity.ok().body(converterService.getConvertHistory());
+    }
+
+    @CrossOrigin("http://127.0.0.1:5500")
+    @DeleteMapping("/currencyconvert/history/clear")
+    public ResponseEntity deleteHistory(){
+        converterService.clearHistory();
+        return ResponseEntity.ok().body("Historia usunięta!");
     }
 }
