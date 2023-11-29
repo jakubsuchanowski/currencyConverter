@@ -2,19 +2,17 @@ package com.js.CurrencyConverter.service;
 
 
 import com.js.CurrencyConverter.entity.ConvertHistory;
-import com.js.CurrencyConverter.exceptions.ExceptionMessage;
+import com.js.CurrencyConverter.model.CurrencyResponseSubset;
 import com.js.CurrencyConverter.model.ExchangeRateDto;
+import com.js.CurrencyConverter.model.RateDto;
 import com.js.CurrencyConverter.repository.ConvertHistoryRepository;
-import lombok.AllArgsConstructor;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -36,9 +34,14 @@ public class ConverterService {
     @Value("${external.api.url2}")
     private String apiUrl2;
 
-    public List<ExchangeRateDto> getExchangeRates(){
-        ExchangeRateDto[] response = restTemplate.getForObject(apiUrl, ExchangeRateDto[].class);
-        return Arrays.asList(response);
+    public CurrencyResponseSubset getExchangeRates(){
+        ResponseEntity<ExchangeRateDto> response = restTemplate.getForEntity(apiUrl, ExchangeRateDto.class);
+
+        ExchangeRateDto apiResponse= response.getBody();
+        CurrencyResponseSubset currencyResponseSubset = new CurrencyResponseSubset();
+        currencyResponseSubset.setEffectiveDate(apiResponse.getEffectiveDate());
+        currencyResponseSubset.setRates(apiResponse.getRates());
+        return currencyResponseSubset;
     }
 
     public Double getConvertedValue(String baseCurrency, String targetCurrency, Double amount){

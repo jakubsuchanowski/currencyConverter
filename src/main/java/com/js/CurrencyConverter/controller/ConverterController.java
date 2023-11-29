@@ -35,13 +35,21 @@ public class ConverterController {
     @CrossOrigin("http://127.0.0.1:5500")
     @GetMapping("/currencyconvert/history")
     public ResponseEntity<List<ConvertHistory>> showAllConversions(){
-        return ResponseEntity.ok().body(converterService.getConvertHistory());
+        try {
+            return ResponseEntity.ok().body(converterService.getConvertHistory());
+        }catch (Exception e){
+            return ResponseEntity.badRequest().build();
+        }
     }
 
     @CrossOrigin("http://127.0.0.1:5500")
     @DeleteMapping("/currencyconvert/history/clear")
     public ResponseEntity deleteHistory(){
-        converterService.clearHistory();
-        return ResponseEntity.ok().body("Historia usunięta!");
+        try {
+            converterService.clearHistory();
+            return ResponseEntity.ok().body("Historia usunięta!");
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("Historia nie została usunięta!");
+        }
     }
 }
