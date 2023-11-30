@@ -7,7 +7,7 @@ import java.util.List;
 
 @Getter
 @Setter
-public class CurrencyResponseSubset {
+public class CurrencySubsetDto {
     String effectiveDate;
     List<RateDto> rates;
 }

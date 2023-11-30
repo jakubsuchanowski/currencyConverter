@@ -13,6 +13,7 @@ import java.util.List;
 public class ConverterController {
 
     private ConverterService converterService;
+    @CrossOrigin("http://127.0.0.1:5500")
     @GetMapping("/exchangerate")
     public ResponseEntity showExchangeRate(){
         return ResponseEntity.ok().body(converterService.getExchangeRates());
