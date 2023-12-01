@@ -9,5 +9,5 @@ import java.util.List;
 @Setter
 public class CurrencySubsetDto {
     String effectiveDate;
-    List<RateDto> rates;
+    List<RatesDto> rates;
 }

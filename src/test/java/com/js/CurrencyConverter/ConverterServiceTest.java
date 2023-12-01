@@ -1,20 +1,18 @@
 package com.js.CurrencyConverter;
 
 import com.js.CurrencyConverter.entity.ConvertHistory;
-import com.js.CurrencyConverter.model.ExchangeRateDto;
-import com.js.CurrencyConverter.model.RateDto;
 import com.js.CurrencyConverter.repository.ConvertHistoryRepository;
 import com.js.CurrencyConverter.service.ConverterService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.junit.runners.JUnit4;
-import org.junit.runners.Parameterized;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.MediaType;
+import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import java.time.LocalDateTime;
@@ -24,6 +22,9 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
+import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
+import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
 @SpringBootTest
 public class ConverterServiceTest {
@@ -36,6 +37,7 @@ public class ConverterServiceTest {
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
+        ReflectionTestUtils.setField(converterService, "apiUrl2", "http://api.nbp.pl/api/exchangerates/rates/A");
     }
     @Test
     void testGetConvertHistory() {
@@ -58,4 +60,48 @@ public class ConverterServiceTest {
         // Verify that the repository's deleteAll method is called
         verify(convertHistoryRepository).deleteAll();
     }
+
+    @Test
+    void testConversionWithDifferentCurrencies() {
+        MockRestServiceServer mockServer = MockRestServiceServer.createServer(restTemplate);
+
+        mockServer.expect(requestTo("http://api.nbp.pl/api/exchangerates/rates/A/USD"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(
+                        "{" +
+                                "\"table\": \"A\","+
+                                "\"currency\": \"dolar amerykański\", " +
+                                "\"code\": \"USD\", " +
+                                "\"rates\": [ " +
+                                "{" +
+                                "\"no\": \"233/A/NBP/2023\"," +
+                                "\"effectiveDate\": \"2023-12-01\"," +
+                                "\"mid\": 3.9910" +
+                                "}" +
+                                "]" +
+                                "}", MediaType.APPLICATION_JSON));
+        mockServer.expect(requestTo("http://api.nbp.pl/api/exchangerates/rates/A/EUR"))
+                .andExpect(method(HttpMethod.GET))
+                .andRespond(withSuccess(
+                        "{" +
+                                "\"table\": \"A\","+
+                                "\"currency\": \"euro\", " +
+                                "\"code\": \"EUR\", " +
+                                "\"rates\": [ " +
+                                "{" +
+                                "\"no\": \"233/A/NBP/2023\"," +
+                                "\"effectiveDate\": \"2023-12-01\"," +
+                                "\"mid\": 4.3494" +
+                                "}" +
+                                "]" +
+                                "}", MediaType.APPLICATION_JSON));
+
+        Double result = converterService.getConvertedValue("USD", "EUR", 100.0);
+
+        // Expected result: (100 * 1.5) / 2.0 = 75.0
+        assertEquals(75.0, result);
+
+        mockServer.verify();
+    }
+
 }

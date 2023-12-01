@@ -2,6 +2,7 @@ package com.js.CurrencyConverter.service;
 
 
 import com.js.CurrencyConverter.entity.ConvertHistory;
+import com.js.CurrencyConverter.model.CurrencyExchangeRateDto;
 import com.js.CurrencyConverter.model.CurrencySubsetDto;
 import com.js.CurrencyConverter.model.ExchangeRateDto;
 import com.js.CurrencyConverter.repository.ConvertHistoryRepository;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.DefaultUriBuilderFactory;
 
+import javax.annotation.PostConstruct;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.text.DecimalFormat;
@@ -54,45 +56,54 @@ public class ConverterService {
     }
 
 
-    public Double getConvertedValue(String baseCurrency, String targetCurrency, Double amount){
+    public Double getConvertedValue(String baseCurrency, String targetCurrency, Double amount) {
         Double response = null;
-        ExchangeRateDto getBaseRate = null;
-        ExchangeRateDto getTargetRate=null;
-        Double rateBaseCurrency=null;
-        Double rateTargetCurrency=null;
-
+        Double rateBaseCurrency;
+        Double rateTargetCurrency;
+        CurrencyExchangeRateDto getBaseRate;
+        CurrencyExchangeRateDto getTargetRate;
             if (!baseCurrency.equals("PLN") && !targetCurrency.equals("PLN")) {
-                getBaseRate = restTemplate.getForObject(apiUrl2 + "/" + baseCurrency, ExchangeRateDto.class);
-                rateBaseCurrency = getBaseRate.getRates().get(0).getMid();
-                Double responsePLN = amount * rateBaseCurrency;
-                getTargetRate = restTemplate.getForObject(apiUrl2 + "/" + targetCurrency, ExchangeRateDto.class);
-                rateTargetCurrency = getTargetRate.getRates().get(0).getMid();
-                response = responsePLN / rateTargetCurrency;
+                getBaseRate = restTemplate.getForObject(apiUrl2+"/"+baseCurrency, CurrencyExchangeRateDto.class);
+                if(getBaseRate != null) {
+                    rateBaseCurrency = getBaseRate.getRates().get(0).getMid();
+
+                    getTargetRate = restTemplate.getForObject(apiUrl2 + "/" + targetCurrency, CurrencyExchangeRateDto.class);
+
+                    if (getTargetRate != null) {
+                        rateTargetCurrency = getTargetRate.getRates().get(0).getMid();
+
+
+                        Double responsePLN = amount * rateBaseCurrency;
+                        response = responsePLN / rateTargetCurrency;
+                    }
+                }
             }
             if (baseCurrency.equals("PLN") && !targetCurrency.equals("PLN")) {
-                getTargetRate = restTemplate.getForObject(apiUrl2 + "/" + targetCurrency, ExchangeRateDto.class);
-                rateTargetCurrency = getTargetRate.getRates().get(0).getMid();
-                response = amount / rateTargetCurrency;
+                getTargetRate = restTemplate.getForObject(apiUrl2+"/"+targetCurrency, CurrencyExchangeRateDto.class);
+                if(getTargetRate != null) {
+                    rateTargetCurrency = getTargetRate.getRates().get(0).getMid();
+                    response = amount / rateTargetCurrency;
+                }
             }
             if (targetCurrency.equals("PLN") && !baseCurrency.equals("PLN")) {
-                getBaseRate = restTemplate.getForObject(apiUrl2 + "/" + baseCurrency, ExchangeRateDto.class);
-                rateBaseCurrency = getBaseRate.getRates().get(0).getMid();
-                response = amount * rateBaseCurrency;
+                getBaseRate = restTemplate.getForObject(apiUrl2+"/"+baseCurrency, CurrencyExchangeRateDto.class);
+               if(getBaseRate != null) {
+                   rateBaseCurrency = getBaseRate.getRates().get(0).getMid();
+                   response = amount * rateBaseCurrency;
+               }
             }
-            if(baseCurrency.equals("PLN") && targetCurrency.equals("PLN")){
-                response=amount;
-            }
-            if(baseCurrency.equals(targetCurrency)) {
+            if (baseCurrency.equals(targetCurrency)) {
                 response = amount;
             }
-            if(response !=0){
+            if (response != null) {
                 BigDecimal roundedValue = BigDecimal.valueOf(response).setScale(2, RoundingMode.HALF_UP);
                 response = roundedValue.doubleValue();
             }
-            convertHistoryRepository.save(new ConvertHistory(0L, baseCurrency,targetCurrency, amount,response, LocalDateTime.now()));
-            return response;
-
+            convertHistoryRepository.save(new ConvertHistory(0L, baseCurrency, targetCurrency, amount, response, LocalDateTime.now()));
+        return response;
     }
+
+
     public List<ConvertHistory> getConvertHistory(){
         return convertHistoryRepository.findAll();
     }

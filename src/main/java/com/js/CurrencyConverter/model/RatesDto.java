@@ -9,7 +9,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class RateDto {
+public class RatesDto {
     String currency;
     String code;
     Double mid;
