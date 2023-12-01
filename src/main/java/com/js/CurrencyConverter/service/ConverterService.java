@@ -55,23 +55,28 @@ public class ConverterService {
 
 
     public Double getConvertedValue(String baseCurrency, String targetCurrency, Double amount){
-            Double response = null;
+        Double response = null;
+        ExchangeRateDto getBaseRate = null;
+        ExchangeRateDto getTargetRate=null;
+        Double rateBaseCurrency=null;
+        Double rateTargetCurrency=null;
+
             if (!baseCurrency.equals("PLN") && !targetCurrency.equals("PLN")) {
-                ExchangeRateDto getBaseRate = restTemplate.getForObject(apiUrl2 + "/" + baseCurrency, ExchangeRateDto.class);
-                Double rateBaseCurrency = getBaseRate.getRates().get(0).getMid();
+                getBaseRate = restTemplate.getForObject(apiUrl2 + "/" + baseCurrency, ExchangeRateDto.class);
+                rateBaseCurrency = getBaseRate.getRates().get(0).getMid();
                 Double responsePLN = amount * rateBaseCurrency;
-                ExchangeRateDto getTargetRate = restTemplate.getForObject(apiUrl2 + "/" + targetCurrency, ExchangeRateDto.class);
-                Double rateTargetCurrency = getTargetRate.getRates().get(0).getMid();
+                getTargetRate = restTemplate.getForObject(apiUrl2 + "/" + targetCurrency, ExchangeRateDto.class);
+                rateTargetCurrency = getTargetRate.getRates().get(0).getMid();
                 response = responsePLN / rateTargetCurrency;
             }
             if (baseCurrency.equals("PLN") && !targetCurrency.equals("PLN")) {
-                ExchangeRateDto getTargetRate = restTemplate.getForObject(apiUrl2 + "/" + targetCurrency, ExchangeRateDto.class);
-                Double rateTargetCurrency = getTargetRate.getRates().get(0).getMid();
+                getTargetRate = restTemplate.getForObject(apiUrl2 + "/" + targetCurrency, ExchangeRateDto.class);
+                rateTargetCurrency = getTargetRate.getRates().get(0).getMid();
                 response = amount / rateTargetCurrency;
             }
             if (targetCurrency.equals("PLN") && !baseCurrency.equals("PLN")) {
-                ExchangeRateDto getBaseRate = restTemplate.getForObject(apiUrl2 + "/" + baseCurrency, ExchangeRateDto.class);
-                Double rateBaseCurrency = getBaseRate.getRates().get(0).getMid();
+                getBaseRate = restTemplate.getForObject(apiUrl2 + "/" + baseCurrency, ExchangeRateDto.class);
+                rateBaseCurrency = getBaseRate.getRates().get(0).getMid();
                 response = amount * rateBaseCurrency;
             }
             if(baseCurrency.equals("PLN") && targetCurrency.equals("PLN")){
