@@ -2,6 +2,7 @@ package com.js.CurrencyConverter.service;
 
 
 import com.js.CurrencyConverter.entity.ConvertHistory;
+import com.js.CurrencyConverter.exceptions.ExceptionMessage;
 import com.js.CurrencyConverter.model.CurrencyExchangeRateDto;
 import com.js.CurrencyConverter.model.CurrencySubsetDto;
 import com.js.CurrencyConverter.model.ExchangeRateDto;
@@ -57,14 +58,14 @@ public class ConverterService {
 
 
     public Double getConvertedValue(String baseCurrency, String targetCurrency, Double amount) {
-        Double response = null;
-        Double rateBaseCurrency;
-        Double rateTargetCurrency;
-        CurrencyExchangeRateDto getBaseRate;
-        CurrencyExchangeRateDto getTargetRate;
+            Double response = null;
+            Double rateBaseCurrency;
+            Double rateTargetCurrency;
+            CurrencyExchangeRateDto getBaseRate;
+            CurrencyExchangeRateDto getTargetRate;
             if (!baseCurrency.equals("PLN") && !targetCurrency.equals("PLN")) {
-                getBaseRate = restTemplate.getForObject(apiUrl2+"/"+baseCurrency, CurrencyExchangeRateDto.class);
-                if(getBaseRate != null) {
+                getBaseRate = restTemplate.getForObject(apiUrl2 + "/" + baseCurrency, CurrencyExchangeRateDto.class);
+                if (getBaseRate != null) {
                     rateBaseCurrency = getBaseRate.getRates().get(0).getMid();
 
                     getTargetRate = restTemplate.getForObject(apiUrl2 + "/" + targetCurrency, CurrencyExchangeRateDto.class);
@@ -79,18 +80,18 @@ public class ConverterService {
                 }
             }
             if (baseCurrency.equals("PLN") && !targetCurrency.equals("PLN")) {
-                getTargetRate = restTemplate.getForObject(apiUrl2+"/"+targetCurrency, CurrencyExchangeRateDto.class);
-                if(getTargetRate != null) {
+                getTargetRate = restTemplate.getForObject(apiUrl2 + "/" + targetCurrency, CurrencyExchangeRateDto.class);
+                if (getTargetRate != null) {
                     rateTargetCurrency = getTargetRate.getRates().get(0).getMid();
                     response = amount / rateTargetCurrency;
                 }
             }
             if (targetCurrency.equals("PLN") && !baseCurrency.equals("PLN")) {
-                getBaseRate = restTemplate.getForObject(apiUrl2+"/"+baseCurrency, CurrencyExchangeRateDto.class);
-               if(getBaseRate != null) {
-                   rateBaseCurrency = getBaseRate.getRates().get(0).getMid();
-                   response = amount * rateBaseCurrency;
-               }
+                getBaseRate = restTemplate.getForObject(apiUrl2 + "/" + baseCurrency, CurrencyExchangeRateDto.class);
+                if (getBaseRate != null) {
+                    rateBaseCurrency = getBaseRate.getRates().get(0).getMid();
+                    response = amount * rateBaseCurrency;
+                }
             }
             if (baseCurrency.equals(targetCurrency)) {
                 response = amount;
@@ -99,8 +100,10 @@ public class ConverterService {
                 BigDecimal roundedValue = BigDecimal.valueOf(response).setScale(2, RoundingMode.HALF_UP);
                 response = roundedValue.doubleValue();
             }
-            convertHistoryRepository.save(new ConvertHistory(0L, baseCurrency, targetCurrency, amount, response, LocalDateTime.now()));
-        return response;
+            if (convertHistoryRepository != null) {
+                convertHistoryRepository.save(new ConvertHistory(0L, baseCurrency, targetCurrency, amount, response, LocalDateTime.now()));
+            }
+            return response;
     }
 
 
