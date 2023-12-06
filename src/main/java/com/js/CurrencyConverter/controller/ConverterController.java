@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpSession;
+import java.util.Collections;
 import java.util.List;
 
 @RestController
@@ -13,14 +15,14 @@ import java.util.List;
 public class ConverterController {
 
     private ConverterService converterService;
-    @CrossOrigin("http://127.0.0.1:5500")
+    @CrossOrigin(origins = "http://127.0.0.1:5500", allowCredentials = "true")
     @GetMapping("/exchangerate")
     public ResponseEntity showExchangeRate(){
         return ResponseEntity.ok().body(converterService.getExchangeRates());
     }
 
 
-    @CrossOrigin("http://127.0.0.1:5500")
+    @CrossOrigin(origins = "http://127.0.0.1:5500", allowCredentials = "true")
     @GetMapping("/currencyconvert/{baseCurrency}/{targetCurrency}")
     public ResponseEntity convertCurrency(
             @PathVariable(value = "baseCurrency") String baseCurrency,
@@ -33,7 +35,7 @@ public class ConverterController {
         }
     }
 
-    @CrossOrigin("http://127.0.0.1:5500")
+    @CrossOrigin(origins = "http://127.0.0.1:5500", allowCredentials = "true")
     @GetMapping("/currencyconvert/history")
     public ResponseEntity<List<ConvertHistory>> showAllConversions(){
         try {
@@ -43,7 +45,7 @@ public class ConverterController {
         }
     }
 
-    @CrossOrigin("http://127.0.0.1:5500")
+    @CrossOrigin(origins = "http://127.0.0.1:5500", allowCredentials = "true")
     @DeleteMapping("/currencyconvert/history/clear")
     public ResponseEntity deleteHistory(){
         try {

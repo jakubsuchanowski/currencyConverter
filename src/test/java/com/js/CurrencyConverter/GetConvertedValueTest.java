@@ -19,8 +19,8 @@ public class GetConvertedValueTest {
 
         Double result = converterService.getConvertedValue(baseCurrency, targetCurrency, amount);
 
-        Double rateBaseCurrency = 3.9850;  // Replace with actual rate
-        Double rateTargetCurrency = 4.3337;  // Replace with actual rate
+        Double rateBaseCurrency = 4.0202;
+        Double rateTargetCurrency = 4.3382;
 
         Double expectedValue = amount * rateBaseCurrency / rateTargetCurrency;
         double tolerance = 0.01;
@@ -40,7 +40,7 @@ public class GetConvertedValueTest {
 
         Double result = converterService.getConvertedValue(baseCurrency, targetCurrency, amount);
 
-        Double rateBaseCurrency = 3.9850;
+        Double rateBaseCurrency = 4.0202;
         Double expectedValue = amount * rateBaseCurrency;
         double tolerance = 0.01;
 
@@ -57,7 +57,7 @@ public class GetConvertedValueTest {
 
 
         Double result = converterService.getConvertedValue(baseCurrency, targetCurrency, amount);
-        Double rateTargetCurrency = 4.3337;
+        Double rateTargetCurrency = 4.3382;
 
         Double expectedValue = amount / rateTargetCurrency;
         double tolerance = 0.01;

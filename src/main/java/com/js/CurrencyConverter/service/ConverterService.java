@@ -2,7 +2,6 @@ package com.js.CurrencyConverter.service;
 
 
 import com.js.CurrencyConverter.entity.ConvertHistory;
-import com.js.CurrencyConverter.exceptions.ExceptionMessage;
 import com.js.CurrencyConverter.model.CurrencyExchangeRateDto;
 import com.js.CurrencyConverter.model.CurrencySubsetDto;
 import com.js.CurrencyConverter.model.ExchangeRateDto;
@@ -11,15 +10,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.util.DefaultUriBuilderFactory;
 
-import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.text.DecimalFormat;
 import java.time.LocalDateTime;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -28,6 +25,8 @@ public class ConverterService {
     private final RestTemplate restTemplate;
     @Autowired
     private ConvertHistoryRepository convertHistoryRepository;
+    @Autowired
+    private HttpServletRequest httpServletRequest;
 
     @Autowired
     public ConverterService(RestTemplate restTemplate) {
@@ -40,6 +39,22 @@ public class ConverterService {
 
     @Value("${external.api.url2}")
     private String apiUrl2;
+
+private String getUserIdentifierFromSession() {
+    HttpSession httpSession = httpServletRequest.getSession();
+    String userIdentifier = (String) httpSession.getAttribute("userIdentifier");
+    if(userIdentifier == null){
+        userIdentifier = generateUserIdentifier();
+        httpSession.setAttribute("userIdentifier", userIdentifier);
+
+    }
+    return userIdentifier;
+
+}
+
+    private String generateUserIdentifier(){
+        return "user_"+UUID.randomUUID().toString();
+    }
 
     public List<CurrencySubsetDto> getExchangeRates(){
         ExchangeRateDto[] exchangeRates = restTemplate.getForObject(apiUrl, ExchangeRateDto[].class);
@@ -101,17 +116,21 @@ public class ConverterService {
                 response = roundedValue.doubleValue();
             }
             if (convertHistoryRepository != null) {
-                convertHistoryRepository.save(new ConvertHistory(0L, baseCurrency, targetCurrency, amount, response, LocalDateTime.now()));
+                String userToken = getUserIdentifierFromSession();
+
+                convertHistoryRepository.save(new ConvertHistory(0L,baseCurrency, targetCurrency, amount, response,userToken, LocalDateTime.now()));
             }
             return response;
     }
 
 
     public List<ConvertHistory> getConvertHistory(){
-        return convertHistoryRepository.findAll();
+        String userToken = getUserIdentifierFromSession();
+        return convertHistoryRepository.findAllByUserToken(userToken);
     }
 
     public void clearHistory(){
-        convertHistoryRepository.deleteAll();
+        String userToken = getUserIdentifierFromSession();
+        convertHistoryRepository.deleteAllByUserToken(userToken);
     }
 }
