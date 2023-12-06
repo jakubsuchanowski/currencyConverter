@@ -1,5 +1,5 @@
 # currencyConverter
-The Currency Converter is a web application that allows the conversion of an amount from one currency to another. The application fetches real-time exchange rate data from an external API provided by NBP (National Bank of Poland). Additionally, the application records the calculation history in a database. Users have the option to display and delete their conversion history. A simple frontend has been implemented using JavaScript and can be found at this link: https://github.com/jakubsuchanowski/converterFront.git.
+The Currency Converter is a web application that allows the conversion of an amount from one currency to another. The application fetches real-time exchange rate data from an external API provided by NBP (National Bank of Poland). Additionally, the application keeps a record of the conversion history in a database. Users have the option to display and delete their conversion history which they convert during during an ongoing session. A simple frontend has been implemented using JavaScript and can be found at this link: https://github.com/jakubsuchanowski/converterFront.git.
 
 Currency conversion:
 ![image](https://github.com/jakubsuchanowski/currencyConverter/assets/82946460/b12cb65f-9328-4036-a48e-7e7be9999297)
